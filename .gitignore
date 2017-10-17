@@ -1,0 +1,13 @@
+# OSX
+*.DS_Store
+
+# IntelliJ project files
+.idea
+*.iml
+out
+gen
+.gitignore
+.idea/
+travelcheck/__pycache__/
+travelcheck/adapter/__pycache__/
+travelcheck/pricesretriever/__pycache__/
