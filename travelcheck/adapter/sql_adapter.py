@@ -10,6 +10,9 @@ class SqlDatabase(object):
         self._db = MySQLdb.connect(host=config['host'], port=config['port'], user=config['user'],
                                    passwd=config['pswd'], db=config['db'])
 
+    def check_connection(self):
+        self._db.ping(True)
+
     def get_price(self, subscription):
         query = "SELECT * FROM subscriptions WHERE origin='%s' AND destination='%s' AND " \
                 "min_days=%s AND max_days=%s AND earliest_date='%s' AND latest_date='%s' AND " \
@@ -22,6 +25,7 @@ class SqlDatabase(object):
                     subscription['latest_date'],
                     subscription['currency'])
 
+        self.check_connection()
         cursor = self._db.cursor()
         cursor.execute(query)
         results = cursor.fetchall()
@@ -43,6 +47,7 @@ class SqlDatabase(object):
                     subscription['latest_date'],
                     subscription['currency'])
 
+        self.check_connection()
         cursor = self._db.cursor()
         try:
             # Execute the SQL command
