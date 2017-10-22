@@ -10,6 +10,19 @@ from travelcheck.prices import Prices
 LOGGER = logging.getLogger(__name__)
 
 
+def cors():
+    if cherrypy.request.method == 'OPTIONS':
+        # pre-flight request
+        # see http://www.w3.org/TR/cors/#cross-origin-request-with-preflight-0
+        cherrypy.response.headers['Access-Control-Allow-Methods'] = 'POST'
+        cherrypy.response.headers['Access-Control-Allow-Headers'] = 'content-type'
+        cherrypy.response.headers['Access-Control-Allow-Origin'] = '*'
+        # tell CherryPy no avoid normal handler
+        return True
+    else:
+        cherrypy.response.headers['Access-Control-Allow-Origin'] = '*'
+
+
 class Root(object):
     @cherrypy.expose
     def ping(self):
@@ -33,6 +46,7 @@ class Server(object):
 
         self._conf = {
             '/': {
+                'tools.cors.on': True,
                 'tools.trailing_slash.on': False
             }
         }
@@ -69,6 +83,8 @@ class Server(object):
             'error_page.400': Server.error_page,
             'error_page.500': Server.error_page
         })
+
+        cherrypy.tools.cors = cherrypy._cptools.HandlerTool(cors)
 
         cherrypy.tree.mount(Root(), "/", config=self._conf)
         cherrypy.tree.mount(Prices(self._db), "/prices", config=self._conf)

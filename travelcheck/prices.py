@@ -16,8 +16,11 @@ class Prices(object):
     @cherrypy.expose
     @cherrypy.tools.json_in()
     @cherrypy.tools.json_out()
-    @cherrypy.tools.allow(methods=['POST'])
+    @cherrypy.tools.allow(methods=['POST', 'OPTIONS'])
     def index(self):
+        if not cherrypy.request.body.length:
+            raise cherrypy.HTTPError(400, "Empty payload")
+
         json_input = cherrypy.request.json
 
         today = datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
