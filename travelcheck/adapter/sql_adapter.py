@@ -25,9 +25,16 @@ class SqlDatabase(object):
                     subscription['latest_date'],
                     subscription['currency'])
 
+        logging.info("Checking connection")
         self.check_connection()
+
+        logging.info("Getting cursor")
         cursor = self._db.cursor()
+
+        logging.info("Running query %s" % query)
         cursor.execute(query)
+
+        logging.info("Got results!")
         results = cursor.fetchall()
         for row in results:
             return row[4]
@@ -47,9 +54,13 @@ class SqlDatabase(object):
                     subscription['latest_date'],
                     subscription['currency'])
 
+        logging.info("Checking connection")
         self.check_connection()
+
+        logging.info("Getting cursor")
         cursor = self._db.cursor()
         try:
+            logging.info("Running query %s" % query)
             # Execute the SQL command
             cursor.execute(query)
             # Commit your changes in the database

@@ -1,7 +1,9 @@
+import json
 import logging
 from datetime import datetime
 
 import cherrypy
+from bson import json_util
 from dateutil.relativedelta import relativedelta
 
 from travelcheck.pricesretriever import kiwi
@@ -37,9 +39,12 @@ class Prices(object):
             'locale': "en"
         }
 
+        logging.info("Subscription: %s" % json.dumps(subscription, indent=4, default=json_util.default))
+
         price = self._db.get_price(subscription)
 
         if not price:
+            logging.info("Adding subscription")
             price = kiwi.subscribe(subscription)
             subscription['price'] = price
             self._db.add_subscription(subscription)
