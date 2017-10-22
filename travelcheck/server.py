@@ -2,7 +2,7 @@ import logging
 import signal
 
 import cherrypy
-from cherrypy.lib import auth_digest
+# from cherrypy.lib import auth_digest
 
 from travelcheck.adapter.sql_adapter import SqlDatabase
 from travelcheck.prices import Prices
@@ -19,12 +19,20 @@ class Root(object):
 class Server(object):
     def __init__(self, config):
         self._db = SqlDatabase(config['sql'])
+
+        # Digest auth:
+        # self._conf = {
+        #     '/': {
+        #         'tools.auth_digest.on': True,
+        #         'tools.auth_digest.realm': 'localhost',
+        #         'tools.auth_digest.get_ha1': auth_digest.get_ha1_dict_plain(config['users']),
+        #         'tools.auth_digest.key': config['key'],
+        #         'tools.trailing_slash.on': False
+        #     }
+        # }
+
         self._conf = {
             '/': {
-                'tools.auth_digest.on': True,
-                'tools.auth_digest.realm': 'localhost',
-                'tools.auth_digest.get_ha1': auth_digest.get_ha1_dict_plain(config['users']),
-                'tools.auth_digest.key': config['key'],
                 'tools.trailing_slash.on': False
             }
         }
