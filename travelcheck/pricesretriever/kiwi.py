@@ -2,11 +2,15 @@ import logging
 from urllib.parse import urlencode
 
 import requests
-import schedule
+from retrying import retry
+
+from travelcheck.util import retry_if_result_none
 
 LOGGER = logging.getLogger(__name__)
 
 
+@retry(wait_exponential_multiplier=1000, wait_exponential_max=10000,
+       retry_on_result=retry_if_result_none)
 def subscribe(subscription):
     host = "https://api.skypicker.com/flights"
 

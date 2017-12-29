@@ -27,31 +27,54 @@ class Prices(object):
 
         today = datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
 
-        subscription = {
-            'origin': json_input['origin'],
-            'destination': json_input['destination'],
-            'earliest_date': today,
-            'latest_date': today + relativedelta(months=+3),
-            'min_days': 2,
-            'max_days': 3,
-            'landing': "search",
-            'currency': "EUR",
-            'locale': "en"
-        }
+        if 'origin' in json_input:
+            origin = json_input['origin']
+        else:
+            raise cherrypy.HTTPError(400, "'origin' not defined")
 
-        logging.info("Subscription: %s" % json.dumps(subscription, indent=4, default=json_util.default))
+        if 'destination' in json_input:
+            destination = json_input['destination']
+        else:
+            raise cherrypy.HTTPError(400, "'destination' not defined")
 
-        price = self._db.get_price(subscription)
+        currency = 'EUR'
 
-        if not price:
-            logging.info("Adding subscription")
-            price = kiwi.subscribe(subscription)
-            subscription['price'] = price
-            self._db.add_subscription(subscription)
+        try:
+            subscription = {
+                'origin': origin,
+                'destination': destination,
+                'earliest_date': today,
+                'latest_date': today + relativedelta(months=+3),
+                'min_days': 2,
+                'max_days': 3,
+                'landing': "search",
+                'currency': currency,
+                'locale': "en"
+            }
 
-        return {
-            'origin': subscription['origin'],
-            'destination': subscription['destination'],
-            'currency': subscription['currency'],
-            'price': price
-        }
+            logging.info(
+                "Subscription: %s" % json.dumps(subscription, indent=4, default=json_util.default))
+
+            price = self._db.get_price(subscription)
+
+            if not price:
+                logging.info("Adding subscription")
+                price = kiwi.subscribe(subscription)
+                subscription['price'] = price
+                self._db.add_subscription(subscription)
+
+            return {
+                'origin': origin,
+                'destination': destination,
+                'currency': currency,
+                'price': price
+            }
+
+        except Exception as err:
+            logging.error("Error: %s" % err)
+            return {
+                'origin': origin,
+                'destination': destination,
+                'currency': currency,
+                'price': None
+            }

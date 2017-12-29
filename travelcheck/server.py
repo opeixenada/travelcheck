@@ -3,8 +3,7 @@ import signal
 
 import cherrypy
 # from cherrypy.lib import auth_digest
-
-from travelcheck.adapter.sql_adapter import SqlDatabase
+from travelcheck.adapter.mongo_adapter import MongoDatabase
 from travelcheck.prices import Prices
 
 LOGGER = logging.getLogger(__name__)
@@ -31,7 +30,7 @@ class Root(object):
 
 class Server(object):
     def __init__(self, config):
-        self._db = SqlDatabase(config['sql'])
+        self._db = MongoDatabase(config['mongo'])
 
         # Digest auth:
         # self._conf = {

@@ -6,9 +6,9 @@ LOGGER = logging.getLogger(__name__)
 
 
 class MongoDatabase(object):
-    def __init__(self, host, db):
-        self._client = MongoClient(host)
-        self._db = self._client[db]
+    def __init__(self, config):
+        self._client = MongoClient(config['host'], config['port'])
+        self._db = self._client[config['db']]
 
     def get_price(self, subscription):
         item = self._db.prices.find_one(subscription)
