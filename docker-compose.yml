@@ -1,0 +1,18 @@
+version: '2'
+
+services:
+  mongo:
+    image: mongo:latest
+    ports:
+      - "27017:27017"
+
+  travelcheck:
+    image: "travelcheck"
+    restart: always
+    links:
+      - mongo
+    depends_on:
+      - mongo
+    ports:
+      - "8080:8080"
+
