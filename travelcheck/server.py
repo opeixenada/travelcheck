@@ -57,7 +57,7 @@ class Server(object):
 
     @staticmethod
     def signal_handler(signum, frame):
-        print("Signal handler called with signal %s, exiting" % str(signum))
+        LOGGER.warning("Signal handler called with signal %s, exiting" % str(signum))
         cherrypy.engine.exit()
 
     @staticmethod

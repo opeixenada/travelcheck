@@ -1,20 +1,30 @@
 import logging
 
 from pymongo import MongoClient
+from datetime import datetime
 
 LOGGER = logging.getLogger(__name__)
 
 
 class MongoDatabase(object):
     def __init__(self, config):
-        self._client = MongoClient("mongo")
-        self._db = self._client[config['db']]
+        client = MongoClient("mongo")
+        db = client[config['db']]
+
+        self._prices = db.prices
+        self._prices.ensure_index("createdAt", expireAfterSeconds=60 * 60 * 24)
+
+        self.__status()
+
+    def __status(self):
+        LOGGER.info("Cached %s prices" % self._prices.count({}))
 
     def get_price(self, subscription):
-        item = self._db.prices.find_one(subscription)
+        item = self._prices.find_one(subscription)
         if item:
             return item['price']
         return None
 
     def add_subscription(self, subscription):
-        self._db.prices.insert(subscription)
+        subscription['createdAt'] = datetime.utcnow()
+        self._prices.insert(subscription)
