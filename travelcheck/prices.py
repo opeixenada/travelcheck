@@ -39,14 +39,34 @@ class Prices(object):
 
         currency = 'EUR'
 
+        if 'earliest_date' in json_input:
+            earliest_date = datetime.strptime(json_input['earliest_date'])
+        else:
+            earliest_date = today
+
+        if 'latest_date' in json_input:
+            latest_date = datetime.strptime(json_input['latest_date'])
+        else:
+            latest_date = today + relativedelta(months=+3)
+
+        if 'min_days' in json_input:
+            min_days = int(json_input['min_days'])
+        else:
+            min_days = 2
+
+        if 'max_days' in json_input:
+            max_days = int(json_input['max_days'])
+        else:
+            max_days = 3
+
         try:
             subscription = {
                 'origin': origin,
                 'destination': destination,
-                'earliest_date': today,
-                'latest_date': today + relativedelta(months=+3),
-                'min_days': 2,
-                'max_days': 3,
+                'earliest_date': earliest_date,
+                'latest_date': latest_date,
+                'min_days': min_days,
+                'max_days': max_days,
                 'landing': "search",
                 'currency': currency,
                 'locale': "en"
