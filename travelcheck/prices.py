@@ -47,6 +47,12 @@ class Prices(object):
         else:
             locale = 'en'
 
+        if 'deeplink' in json_input and (
+                json_input['deeplink'] == "search" or json_input['deeplink'] == "flight"):
+            deeplink = json_input['deeplink']
+        else:
+            deeplink = 'search'
+
         if 'earliest_date' in json_input:
             earliest_date = datetime.strptime(json_input['earliest_date'])
         else:
@@ -75,9 +81,9 @@ class Prices(object):
                 'latest_date': latest_date,
                 'min_days': min_days,
                 'max_days': max_days,
-                'landing': "search",
                 'currency': currency,
-                'locale': locale
+                'locale': locale,
+                'deeplink': deeplink
             }
 
             logging.info(
@@ -90,13 +96,10 @@ class Prices(object):
                 price = kiwi.subscribe(subscription)
                 subscription['price'] = price
                 self._db.add_subscription(subscription)
+            else:
+                subscription['price'] = price
 
-            return {
-                'origin': origin,
-                'destination': destination,
-                'currency': currency,
-                'price': price
-            }
+            return subscription
 
         except Exception as err:
             logging.error("Error: %s" % err)
