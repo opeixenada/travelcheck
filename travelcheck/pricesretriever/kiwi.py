@@ -1,4 +1,5 @@
 import logging
+from datetime import datetime
 from urllib.parse import urlencode
 
 import requests
@@ -21,6 +22,8 @@ def subscribe(subscription):
         'dateTo': subscription['latest_date'].strftime("%d/%m/%Y"),
         'daysInDestinationFrom': subscription['min_days'],
         'daysInDestinationTo': subscription['max_days'],
+        'curr': subscription['currency'],
+        'locale': subscription['locale'],
         'directFlights': 1,
         # 'partner': 'picky',
         'partner_market': 'de',
@@ -36,7 +39,17 @@ def subscribe(subscription):
         first_result = response.json()['data'][0]
         subscription_response = dict()
         subscription_response['price'] = first_result['price']
-        subscription_response['deep_link'] = first_result['deep_link']
-        return response.json()['data'][0]['price']
+
+        subscription_response['lastChecked'] = datetime.utcnow()
+
+        subscription_response['outboundDate'] = datetime.utcfromtimestamp(first_result['dTimeUTC'])
+
+        first_return_leg = next(leg for leg in first_result['route'] if lambda x: x['return'] == 1)
+        subscription_response['inboundDate'] = datetime.utcfromtimestamp(
+            first_return_leg['dTimeUTC'])
+
+        subscription_response['deeplink'] = first_result['deep_link']
+
+        return subscription_response
 
     return None
