@@ -33,6 +33,10 @@ def subscribe(subscription):
     response = requests.get(url)
 
     if response.json() and response.json()['data']:
+        first_result = response.json()['data'][0]
+        subscription_response = dict()
+        subscription_response['price'] = first_result['price']
+        subscription_response['deep_link'] = first_result['deep_link']
         return response.json()['data'][0]['price']
 
     return None
