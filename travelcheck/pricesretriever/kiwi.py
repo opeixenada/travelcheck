@@ -1,6 +1,6 @@
 import logging
 from datetime import datetime
-from urllib.parse import urlencode
+from urllib.parse import urlunparse, urlencode, urlparse, parse_qs
 
 import requests
 from retrying import retry
@@ -48,8 +48,21 @@ def subscribe(subscription):
         subscription_response['inboundDate'] = datetime.utcfromtimestamp(
             first_return_leg['dTimeUTC'])
 
-        subscription_response['deeplink'] = first_result['deep_link']
+        subscription_response['deeplink'] = get_deeplink(first_result['deep_link'],
+                                                         subscription['deeplink'])
 
         return subscription_response
 
     return None
+
+
+def get_deeplink(link, type):
+    if type == "flight":
+        url = urlparse(link)
+        query = parse_qs(url)
+        query.pop('flightsId')
+        query.pop('booking_token')
+        url._replace(query=urlencode(query, True))
+        return urlunparse(url)
+    else:
+        return link
