@@ -37,7 +37,15 @@ class Prices(object):
         else:
             raise cherrypy.HTTPError(400, "'destination' not defined")
 
-        currency = 'EUR'
+        if 'currency' in json_input:
+            currency = json_input['currency']
+        else:
+            currency = 'EUR'
+
+        if 'locale' in json_input:
+            locale = json_input['locale']
+        else:
+            locale = 'en'
 
         if 'earliest_date' in json_input:
             earliest_date = datetime.strptime(json_input['earliest_date'])
@@ -69,7 +77,7 @@ class Prices(object):
                 'max_days': max_days,
                 'landing': "search",
                 'currency': currency,
-                'locale': "en"
+                'locale': locale
             }
 
             logging.info(
