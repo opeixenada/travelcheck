@@ -1,6 +1,7 @@
 import json
 import logging
 from datetime import datetime
+from urllib.parse import urlunparse, urlencode, urlparse, parse_qs
 
 import cherrypy
 from bson import json_util
@@ -48,64 +49,98 @@ class Prices(object):
             locale = 'en'
 
         if 'deeplink' in json_input and (
-                json_input['deeplink'] == "search" or json_input['deeplink'] == "flight"):
-            deeplink = json_input['deeplink']
+                        json_input['deeplink'] == "search" or json_input['deeplink'] == "flight"):
+            deeplink_type = json_input['deeplink']
         else:
-            deeplink = 'search'
+            deeplink_type = 'search'
 
-        if 'earliest_date' in json_input:
-            earliest_date = datetime.strptime(json_input['earliest_date'])
+        if 'earliest' in json_input:
+            earliest = datetime.strptime(json_input['earliest'], "%d/%m/%Y")
         else:
-            earliest_date = today
+            earliest = today
 
-        if 'latest_date' in json_input:
-            latest_date = datetime.strptime(json_input['latest_date'])
+        if 'latest' in json_input:
+            latest = datetime.strptime(json_input['latest'], "%d/%m/%Y")
         else:
-            latest_date = today + relativedelta(months=+3)
+            latest = earliest + relativedelta(months=+3)
 
-        if 'min_days' in json_input:
-            min_days = int(json_input['min_days'])
+        if earliest > latest:
+            earliest = latest
+
+        if 'minDays' in json_input:
+            min_days = int(json_input['minDays'])
         else:
             min_days = 2
 
-        if 'max_days' in json_input:
-            max_days = int(json_input['max_days'])
+        if 'maxDays' in json_input:
+            max_days = int(json_input['maxDays'])
         else:
-            max_days = 3
+            max_days = min_days + 1
+
+        if max_days < min_days:
+            max_days = min_days
 
         try:
             subscription = {
                 'origin': origin,
                 'destination': destination,
-                'earliest_date': earliest_date,
-                'latest_date': latest_date,
-                'min_days': min_days,
-                'max_days': max_days,
+                'earliest': earliest,
+                'latest': latest,
+                'minDays': min_days,
+                'maxDays': max_days,
                 'currency': currency,
-                'locale': locale,
-                'deeplink': deeplink
+                'locale': locale
             }
 
             logging.info(
                 "Subscription: %s" % json.dumps(subscription, indent=4, default=json_util.default))
 
-            price = self._db.get_price(subscription)
+            result = self._db.get_result(subscription)
 
-            if not price:
+            if not result:
                 logging.info("Adding subscription")
-                price = kiwi.subscribe(subscription)
-                subscription['price'] = price
-                self._db.add_subscription(subscription)
-            else:
-                subscription['price'] = price
+                result = kiwi.subscribe(subscription)
+                result.update(subscription)
+                self._db.add_subscription(result)
 
-            return subscription
+            response = Prices.__get_response(result, deeplink_type)
+            return response
 
         except Exception as err:
             logging.error("Error: %s" % err)
             return {
                 'origin': origin,
                 'destination': destination,
+                'price': None,
                 'currency': currency,
-                'price': None
+                'outboundDate': None,
+                'inboundDate': None,
+                'lastChecked': None,
+                'deeplink': None,
+                'locale': locale
             }
+
+    @staticmethod
+    def __get_response(result, deeplink_type):
+        return {
+            'origin': result['origin'],
+            'destination': result['destination'],
+            'price': result['price'],
+            'currency': result['currency'],
+            'outboundDate': result['outboundDate'].strftime("%d-%m-%Y"),
+            'inboundDate': result['inboundDate'].strftime("%d-%m-%Y"),
+            'lastChecked': result['lastChecked'].strftime("%d-%m-%Y"),
+            'deeplink': Prices.__get_deeplink(result.get('deeplink'), deeplink_type),
+            'locale': result['locale']
+        }
+
+    @staticmethod
+    def __get_deeplink(link, deeplink_type):
+        if deeplink_type == "flight":
+            url = urlparse(link)
+            query = parse_qs(url.query)
+            query.pop('flightsId')
+            query.pop('booking_token')
+            return urlunparse(url._replace(query=urlencode(query, True)))
+        else:
+            return link

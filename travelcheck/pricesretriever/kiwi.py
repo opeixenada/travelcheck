@@ -1,6 +1,6 @@
 import logging
 from datetime import datetime
-from urllib.parse import urlunparse, urlencode, urlparse, parse_qs
+from urllib.parse import urlencode
 
 import requests
 from retrying import retry
@@ -18,20 +18,22 @@ def subscribe(subscription):
     query = {
         'flyFrom': subscription['origin'],
         'to': subscription['destination'],
-        'dateFrom': subscription['earliest_date'].strftime("%d/%m/%Y"),
-        'dateTo': subscription['latest_date'].strftime("%d/%m/%Y"),
-        'daysInDestinationFrom': subscription['min_days'],
-        'daysInDestinationTo': subscription['max_days'],
+        'dateFrom': subscription['earliest'].strftime("%d/%m/%Y"),
+        'dateTo': subscription['latest'].strftime("%d/%m/%Y"),
+        'daysInDestinationFrom': subscription['minDays'],
+        'daysInDestinationTo': subscription['maxDays'],
         'curr': subscription['currency'],
         'locale': subscription['locale'],
         'directFlights': 1,
-        # 'partner': 'picky',
+        'partner': 'picky',
         'partner_market': 'de',
         'sort': 'price',
         'asc': 1
     }
 
     url = host + '?' + urlencode(query)
+
+    logging.info("Requesting %s" % url)
 
     response = requests.get(url)
 
@@ -44,25 +46,12 @@ def subscribe(subscription):
 
         subscription_response['outboundDate'] = datetime.utcfromtimestamp(first_result['dTimeUTC'])
 
-        first_return_leg = next(leg for leg in first_result['route'] if lambda x: x['return'] == 1)
+        first_return_leg = next(leg for leg in first_result['route'] if leg['return'] == 1)
         subscription_response['inboundDate'] = datetime.utcfromtimestamp(
             first_return_leg['dTimeUTC'])
 
-        subscription_response['deeplink'] = get_deeplink(first_result['deep_link'],
-                                                         subscription['deeplink'])
+        subscription_response['deeplink'] = first_result.get('deep_link')
 
         return subscription_response
 
     return None
-
-
-def get_deeplink(link, type):
-    if type == "flight":
-        url = urlparse(link)
-        query = parse_qs(url)
-        query.pop('flightsId')
-        query.pop('booking_token')
-        url._replace(query=urlencode(query, True))
-        return urlunparse(url)
-    else:
-        return link

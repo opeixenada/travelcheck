@@ -19,10 +19,11 @@ class MongoDatabase(object):
     def __status(self):
         LOGGER.info("Cached %s prices" % self._prices.count({}))
 
-    def get_price(self, subscription):
+    def get_result(self, subscription):
         item = self._prices.find_one(subscription)
         if item:
-            return item['price']
+            item.pop('_id')
+            return item
         return None
 
     def add_subscription(self, subscription):
