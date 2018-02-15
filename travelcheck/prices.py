@@ -127,9 +127,9 @@ class Prices(object):
             'destination': result['destination'],
             'price': result['price'],
             'currency': result['currency'],
-            'outboundDate': result['outboundDate'].strftime("%d-%m-%Y"),
-            'inboundDate': result['inboundDate'].strftime("%d-%m-%Y"),
-            'lastChecked': result['lastChecked'].strftime("%d-%m-%Y"),
+            'outboundDate': result['outboundDate'].strftime("%Y-%m-%d"),
+            'inboundDate': result['inboundDate'].strftime("%Y-%m-%d"),
+            'lastChecked': result['lastChecked'].strftime("%Y-%m-%d"),
             'deeplink': Prices.__get_deeplink(result.get('deeplink'), deeplink_type),
             'locale': result['locale']
         }
