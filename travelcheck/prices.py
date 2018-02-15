@@ -55,12 +55,12 @@ class Prices(object):
             deeplink_type = 'search'
 
         if 'earliest' in json_input:
-            earliest = datetime.strptime(json_input['earliest'], "%d-%m-%Y")
+            earliest = datetime.strptime(json_input['earliest'], "%Y-%m-%d")
         else:
             earliest = today
 
         if 'latest' in json_input:
-            latest = datetime.strptime(json_input['latest'], "%d-%m-%Y")
+            latest = datetime.strptime(json_input['latest'], "%Y-%m-%d")
         else:
             latest = earliest + relativedelta(months=+3)
 
