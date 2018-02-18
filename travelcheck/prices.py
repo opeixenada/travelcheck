@@ -28,38 +28,38 @@ class Prices(object):
 
         today = datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
 
-        if 'origin' in json_input:
+        if json_input.get('origin'):
             origin = json_input['origin']
         else:
             raise cherrypy.HTTPError(400, "'origin' not defined")
 
-        if 'destination' in json_input:
+        if json_input.get('destination'):
             destination = json_input['destination']
         else:
             raise cherrypy.HTTPError(400, "'destination' not defined")
 
-        if 'currency' in json_input:
+        if json_input.get('currency'):
             currency = json_input['currency']
         else:
             currency = 'EUR'
 
-        if 'locale' in json_input:
+        if json_input.get('locale'):
             locale = json_input['locale']
         else:
             locale = 'en'
 
-        if 'deeplink' in json_input and (
-                        json_input['deeplink'] == "search" or json_input['deeplink'] == "flight"):
+        if json_input.get('deeplink') and (
+                json_input['deeplink'] == "search" or json_input['deeplink'] == "flight"):
             deeplink_type = json_input['deeplink']
         else:
             deeplink_type = 'search'
 
-        if 'earliest' in json_input:
+        if json_input.get('earliest'):
             earliest = datetime.strptime(json_input['earliest'], "%Y-%m-%d")
         else:
             earliest = today
 
-        if 'latest' in json_input:
+        if json_input.get('latest'):
             latest = datetime.strptime(json_input['latest'], "%Y-%m-%d")
         else:
             latest = earliest + relativedelta(months=+3)
@@ -67,12 +67,12 @@ class Prices(object):
         if earliest > latest:
             earliest = latest
 
-        if 'minDays' in json_input:
+        if json_input.get('minDays'):
             min_days = int(json_input['minDays'])
         else:
             min_days = 2
 
-        if 'maxDays' in json_input:
+        if json_input.get('maxDays'):
             max_days = int(json_input['maxDays'])
         else:
             max_days = min_days + 1
