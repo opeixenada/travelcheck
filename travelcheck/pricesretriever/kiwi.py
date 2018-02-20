@@ -11,7 +11,7 @@ LOGGER = logging.getLogger(__name__)
 
 
 @retry(wait_exponential_multiplier=1000, wait_exponential_max=10000,
-       retry_on_result=retry_if_result_none)
+       retry_on_result=retry_if_result_none, stop_max_attempt_number=5)
 def subscribe(subscription):
     host = "https://api.skypicker.com/flights"
 

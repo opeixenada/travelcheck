@@ -48,37 +48,51 @@ class Prices(object):
         else:
             locale = 'en'
 
+        # Deeplink
+
         if json_input.get('deeplink') and (
                 json_input['deeplink'] == "search" or json_input['deeplink'] == "flight"):
             deeplink_type = json_input['deeplink']
         else:
             deeplink_type = 'search'
 
-        if json_input.get('earliest'):
-            earliest = datetime.strptime(json_input['earliest'], "%Y-%m-%d")
-        else:
-            earliest = today
+        # Dates
 
-        if json_input.get('latest'):
+        earliest = earliest = today
+        latest = earliest + relativedelta(months=+3)
+
+        if json_input.get('earliest') and json_input.get('latest'):
+            earliest = datetime.strptime(json_input['earliest'], "%Y-%m-%d")
             latest = datetime.strptime(json_input['latest'], "%Y-%m-%d")
-        else:
+            if earliest >= latest:
+                raise cherrypy.HTTPError(400, "'earliest' must be before 'latest")
+
+        elif json_input.get('earliest'):
+            earliest = datetime.strptime(json_input['earliest'], "%Y-%m-%d")
             latest = earliest + relativedelta(months=+3)
 
-        if earliest > latest:
-            earliest = latest
+        elif json_input.get('latest'):
+            latest = datetime.strptime(json_input['latest'], "%Y-%m-%d")
+            earliest = latest - relativedelta(months=+3)
 
-        if json_input.get('minDays'):
+        # Min & max days
+
+        min_days = 2
+        max_days = 3
+
+        if json_input.get('minDays') and json_input.get('maxDays'):
             min_days = int(json_input['minDays'])
-        else:
-            min_days = 2
-
-        if json_input.get('maxDays'):
             max_days = int(json_input['maxDays'])
-        else:
+            if min_days > max_days:
+                raise cherrypy.HTTPError(400, "'minDays' must be not greater than 'maxDays")
+
+        elif json_input.get('minDays'):
+            min_days = int(json_input['minDays'])
             max_days = min_days + 1
 
-        if max_days < min_days:
-            max_days = min_days
+        elif json_input.get('maxDays'):
+            max_days = int(json_input['maxDays'])
+            min_days = 1
 
         try:
             subscription = {
