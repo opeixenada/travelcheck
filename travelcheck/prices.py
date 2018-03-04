@@ -150,7 +150,7 @@ class Prices(object):
 
     @staticmethod
     def __get_deeplink(link, deeplink_type):
-        if deeplink_type == "flight":
+        if deeplink_type == "search":
             url = urlparse(link)
             query = parse_qs(url.query)
             query.pop('flightsId')
