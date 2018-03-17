@@ -15,4 +15,6 @@ services:
       - mongo
     ports:
       - "8080:8080"
-
+    volumes:
+      - "/etc/letsencrypt/archive/escapefromberl.in:/etc/letsencrypt/archive/escapefromberl.in"
+      - "/etc/letsencrypt/live/escapefromberl.in:/etc/letsencrypt/live/escapefromberl.in"

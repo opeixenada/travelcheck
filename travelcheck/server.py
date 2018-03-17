@@ -66,7 +66,10 @@ class Server(object):
 
         cherrypy.config.update({
             'server.socket_host': "0.0.0.0",
-            'server.socket_port': int(port)
+            'server.socket_port': int(port),
+            'server.ssl_module': 'builtin',
+            'server.ssl_certificate': '/etc/letsencrypt/live/escapefromberl.in/fullchain.pem',
+            'server.ssl_private_key': '/etc/letsencrypt/live/escapefromberl.in/privkey.pem'
         })
 
         cherrypy.engine.start()
