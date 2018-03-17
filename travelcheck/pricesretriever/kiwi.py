@@ -24,7 +24,6 @@ def subscribe(subscription):
         'daysInDestinationTo': subscription['maxDays'],
         'curr': subscription['currency'],
         'locale': subscription['locale'],
-        'directFlights': 1,
         'partner': 'picky',
         'partner_market': 'de',
         'sort': 'price',
