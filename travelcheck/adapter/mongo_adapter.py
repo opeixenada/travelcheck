@@ -8,7 +8,8 @@ LOGGER = logging.getLogger(__name__)
 
 class MongoDatabase(object):
     def __init__(self, config):
-        client = MongoClient("mongo")
+        
+        client = MongoClient(config['dbUri'])
         db = client[config['db']]
 
         self._prices = db.prices
