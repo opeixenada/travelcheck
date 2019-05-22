@@ -31,6 +31,7 @@ class Root(object):
 class Server(object):
     def __init__(self, config):
         self._db = MongoDatabase(config['mongo'])
+        self._config_kiwi = config['kiwi']
 
         # Digest auth:
         # self._conf = {
@@ -88,5 +89,6 @@ class Server(object):
 
         cherrypy.tools.cors = cherrypy._cptools.HandlerTool(cors)
 
+        # set the handler for our API requests
         cherrypy.tree.mount(Root(), "/", config=self._conf)
-        cherrypy.tree.mount(Prices(self._db), "/prices", config=self._conf)
+        cherrypy.tree.mount(Prices(self._db, self._config_kiwi), "/prices", config=self._conf)
